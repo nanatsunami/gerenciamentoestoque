@@ -6,18 +6,18 @@
 
 ## Identificação do Grupo
 
-| Campo | Preenchimento |
-|-------|---------------|
-| Nome do projeto | |
-| Repositório GitHub | |
-| Integrante 1 | Natsumi Goto — 42865433 |
-| Integrante 2 | Vitória Alessandra das Neves — 41812182 |
+|       Campo        |                    Preenchimento                    |
+|--------------------|-----------------------------------------------------|
+| Nome do projeto    | Sistema de Gerenciamento de Estoque                 |
+| Repositório GitHub | https://github.com/nanatsunami/gerenciamentoestoque/|
+| Integrante 1       | Natsumi Goto — 42865433                             |
+| Integrante 2       | Vitória Alessandra das Neves — 41812182             |
 
 ---
 
 ## 1. Escolha e Justificativa das Estruturas de Dados
 
-### Estrutura 1 — [Nome da Estrutura]
+### Estrutura 1 — Pila
 
 **Nome completo e categoria:**
 Lista dinâmica (Array/List em Python) — estrutura linear sequencial
@@ -47,7 +47,7 @@ A principal limitação da lista é o custo da busca sequencial (O(n)), que pode
 
 ---
 
-### Estrutura 2 — [Nome da Estrutura] *(se houver)*
+### Estrutura 2 — Fila
 
 **Nome completo e categoria:**
 Fila (Queue) — estrutura linear do tipo FIFO (First In, First Out)
@@ -127,78 +127,100 @@ A fila não permite acesso direto a elementos intermediários, sendo limitada ao
 
 ### In-Scope — O que será implementado
 
-> Mínimo 5 itens. Cada item deve ter um critério de aceite no formato Dado / Quando / Então.
-
----
-
-**Item 1:** [Nome curto da funcionalidade]
+**Item 1:** Cadastro de Produto
 
 Critério de aceite:
-> **Dado** [contexto/estado inicial],
-> **quando** [ação executada pelo usuário ou sistema],
-> **então** [resultado esperado e verificável].
+> **Dado** que o usuário está no sistema,
+> **quando** ele informa nome, quantidade, valor unitário e data de entrada,
+> **então** o produto deve ser armazenado corretamente na lista de produtos.
 
 ---
 
-**Item 2:** [Nome curto da funcionalidade]
+**Item 2:** Identificação de produto perecível
 
 Critério de aceite:
-> **Dado** [contexto/estado inicial],
-> **quando** [ação executada],
-> **então** [resultado esperado].
+> **Dado** que o usuário está cadastrando um produto,
+> **quando** ele indicar que o produto é perecível,
+> **então** o sistema deve solicitar e armazenar a data de validade do produto.
 
 ---
 
-**Item 3:** [Nome curto da funcionalidade]
+**Item 3:** Cálculo do índice de prioridade
 
 Critério de aceite:
-> **Dado** [contexto/estado inicial],
-> **quando** [ação executada],
-> **então** [resultado esperado].
+> **Dado** que um produto foi cadastrado,
+> **quando** o sistema processar seus dados,
+> **então** deve calcular automaticamente o índice de prioridade com base em tempo em estoque, quantidade e valor total investido.
 
 ---
 
-**Item 4:** [Nome curto da funcionalidade]
+**Item 4:** Ordenação de produtos
 
 Critério de aceite:
-> **Dado** [contexto/estado inicial],
-> **quando** [ação executada],
-> **então** [resultado esperado].
+> **Dado** que existem produtos cadastrados,
+> **quando** o usuário selecionar um critério de ordenação,
+> **então** o sistema deve exibir a lista ordenada conforme o critério escolhido.
 
 ---
 
-**Item 5:** [Nome curto da funcionalidade]
-
+**Item 5:** Identificação de produtos críticos
 Critério de aceite:
-> **Dado** [contexto/estado inicial],
-> **quando** [ação executada],
-> **então** [resultado esperado].
+> **Dado** que os produtos possuem índice de prioridade calculado,
+> **quando** o sistema identificar valores acima de um limite definido,
+> **então** os produtos devem ser classificados como críticos.
 
 ---
 
-*(Adicione mais itens se necessário)*
+**Item 6:** Processamento de produtos críticos (uso da fila)
+Critério de aceite:
+> **Dado** que existem produtos classificados como críticos,
+> **quando** o sistema iniciar o processamento,
+> **então** os produtos devem ser inseridos em uma fila e processados sequencialmente, respeitando a ordem de inserção.
 
+---
+
+**Item 7:** Atualização de produtos
+Critério de aceite:
+> **Dado** que um produto já está cadastrado,
+> **quando** o usuário alterar seus dados,
+> **então** as informações devem ser atualizadas corretamente na lista.
+
+---
+
+**Item 8:** Remoção de produtos
+Critério de aceite:
+> **Dado** que um produto está cadastrado,
+> **quando** o usuário solicitar sua remoção,
+> **então** o produto deve ser removido da lista de forma consistente.
+
+---
+
+**Item 9:** Interface de usuário (CLI/GUI)
+Critério de aceite:
+> **Dado** que o usuário inicia o sistema,
+> **quando** interage com o menu ou interface,
+> **então** deve conseguir acessar as funcionalidades de forma clara e organizada.
 ---
 
 ### Out-of-Scope — O que não será implementado
 
 > Mínimo 3 itens. Explique brevemente por que cada item ficou fora do escopo.
 
-| Funcionalidade | Motivo de exclusão |
-|----------------|--------------------|
-| [Funcionalidade 1] | [Ex.: fora do escopo do semestre, complexidade elevada, não agrega ao aprendizado do conteúdo de ED] |
-| [Funcionalidade 2] | |
+|              Funcionalidade                  | Motivo de exclusão |
+|----------------------------------------------|--------------------|
+| Sistema automático de definição de promoções | Exige regras de negócio mais avançadas, não sendo foco da aplicação de estruturas de dados |
+| Controle multiusuário com autenticação       | Aumenta a complexidade sem contribuir diretamente para o objetivo principal da disciplina |
 | [Funcionalidade 3] | |
 
 ---
 
 ## 5. Repositório GitHub
 
-**Link do repositório:** [cole aqui a URL pública]
+**Link do repositório:** https://github.com/nanatsunami/gerenciamentoestoque/
 
 **Checklist do repositório:**
 
-- [ ] Repositório público com nome descritivo
+- [V] Repositório público com nome descritivo
 - [ ] `.gitignore` configurado para a linguagem escolhida
 - [ ] `README.md` com nome, descrição e instruções de execução
 - [ ] Mínimo de 5 commits com prefixos semânticos (`feat:`, `fix:`, `test:`, `docs:`, `refactor:`)
