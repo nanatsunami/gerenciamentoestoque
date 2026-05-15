@@ -1,12 +1,13 @@
 import tkinter as tk
 from tkinter import messagebox
 from tkcalendar import DateEntry
+from datetime import datetime
 
 from src.core.lista_produtos import ListaProdutos
 from src.core.fila_criticos import FilaCriticos
 from src.service.estoque_service import EstoqueService
 
-# ===== INSTÂNCIAS =====
+# ===== INICIALIZAÇÃO =====
 
 lista = ListaProdutos()
 fila = FilaCriticos()
@@ -25,125 +26,125 @@ def mostrar_cadastro():
     frame_lista.pack_forget()
     frame_cadastro.pack()
 
+def toggle_validade():
+    if perecivel_var.get():
+        frame_validade.pack()
+    else:
+        frame_validade.pack_forget()
+
 def atualizar_lista():
     lista_box.delete(0, tk.END)
 
     produtos = lista.exibir()
     criterio = dropdown_var.get()
+    busca = entry_busca.get().lower()
 
-    # calcular prioridade para todos
-    for p in produtos:
-        p["prioridade"] = service.calcular_prioridade(p)
+    # 🔍 FILTRO POR NOME
+    if busca:
+        produtos = [p for p in produtos if busca in p["nome"].lower()]
 
-    # ordenar
+    # 🔽 ORDENAÇÃO
     if criterio == "Quantidade":
         produtos = sorted(produtos, key=lambda x: x["quantidade"])
-    elif criterio == "Valor":
-        produtos = sorted(produtos, key=lambda x: x["valor"])
-    elif criterio == "Data":
-        produtos = sorted(produtos, key=lambda x: x["data"])
-    elif criterio == "Prioridade":
-        produtos = sorted(produtos, key=lambda x: x["prioridade"], reverse=True)
 
-    # exibir
+    elif criterio == "Valor (mais barato)":
+        produtos = sorted(produtos, key=lambda x: x["preco"])
+
+    elif criterio == "Valor (mais caro)":
+        produtos = sorted(produtos, key=lambda x: x["preco"], reverse=True)
+
+    elif criterio == "Data (mais antigo)":
+        produtos = sorted(produtos, key=lambda x: datetime.strptime(x["data"], "%d/%m/%Y"))
+
+    elif criterio == "Data (mais recente)":
+        produtos = sorted(produtos, key=lambda x: datetime.strptime(x["data"], "%d/%m/%Y"), reverse=True)
+
+    # 🧠 EXIBIÇÃO
     for p in produtos:
+        prioridade = service.calcular_prioridade(p)
+
         texto = (
             f"{p['nome']} | Qtd: {p['quantidade']} | "
-            f"R$ {p['valor']} | {p['data']} | "
-            f"Prioridade: {int(p['prioridade'])}"
+            f"Custo: R$ {p['custo']} | Venda: R$ {p['preco']} | "
+            f"{p['data']} | Prioridade: {int(prioridade)}"
         )
 
-        if "validade" in p:
-            texto += f" | Val: {p['validade']}"
-
         lista_box.insert(tk.END, texto)
-
-def toggle_validade():
-    if perecivel_var.get():
-        label_validade.pack()
-        date_validade.pack()
-    else:
-        label_validade.pack_forget()
-        date_validade.pack_forget()
 
 def cadastrar():
     nome = entry_nome.get()
     qtd = entry_qtd.get()
-    valor = entry_valor.get()
+    custo = entry_custo.get()
+    preco = entry_preco.get()
     data = entry_data.get()
 
-    if not nome or not qtd or not valor:
+    if not nome or not qtd or not custo or not preco or not data:
         messagebox.showerror("Erro", "Preencha todos os campos")
         return
 
-    try:
-        produto = {
-            "nome": nome,
-            "quantidade": int(qtd),
-            "valor": float(valor),
-            "data": data
-        }
+    produto = {
+        "nome": nome,
+        "quantidade": int(qtd),
+        "custo": float(custo),
+        "preco": float(preco),
+        "data": data
+    }
 
-        if perecivel_var.get():
-            produto["validade"] = date_validade.get()
+    if perecivel_var.get():
+        produto["validade"] = entry_validade.get()
 
-        lista.inserir(produto)
-        service.salvar_em_arquivo()
+    lista.inserir(produto)
+    service.salvar_em_arquivo()
 
-        messagebox.showinfo("Sucesso", "Produto cadastrado!")
+    messagebox.showinfo("Sucesso", "Produto cadastrado!")
 
-        limpar_campos()
-        mostrar_lista()
-
-    except ValueError:
-        messagebox.showerror("Erro", "Quantidade e valor devem ser numéricos")
+    limpar_campos()
+    mostrar_lista()
 
 def limpar_campos():
     entry_nome.delete(0, tk.END)
     entry_qtd.delete(0, tk.END)
-    entry_valor.delete(0, tk.END)
-    perecivel_var.set(False)
-    toggle_validade()
-
-def mostrar_criticos():
-    lista_box.delete(0, tk.END)
-
-    produtos = lista.exibir()
-
-    for p in produtos:
-        p["prioridade"] = service.calcular_prioridade(p)
-
-    criticos = [p for p in produtos if p["prioridade"] > 100]
-
-    for p in criticos:
-        texto = (
-            f"{p['nome']} | Qtd: {p['quantidade']} | "
-            f"R$ {p['valor']} | Prioridade: {int(p['prioridade'])}"
-        )
-        lista_box.insert(tk.END, texto)
+    entry_custo.delete(0, tk.END)
+    entry_preco.delete(0, tk.END)
 
 # ===== JANELA =====
 
 root = tk.Tk()
 root.title("Sistema de Estoque")
-root.geometry("550x450")
+root.geometry("600x500")
 
 # ===== FRAME LISTA =====
 
 frame_lista = tk.Frame(root)
 
-tk.Label(frame_lista, text="Produtos em Estoque", font=("Arial", 14)).pack(pady=10)
+tk.Label(frame_lista, text="Produtos em Estoque", font=("Arial", 14)).pack()
 
+# 🔍 BARRA DE PESQUISA
+tk.Label(frame_lista, text="Buscar por nome:").pack()
+entry_busca = tk.Entry(frame_lista)
+entry_busca.pack()
+
+tk.Button(frame_lista, text="Buscar", command=atualizar_lista).pack()
+
+# 🔽 DROPDOWN
 dropdown_var = tk.StringVar(value="Quantidade")
 
-dropdown = tk.OptionMenu(frame_lista, dropdown_var, "Quantidade", "Valor", "Data", "Prioridade")
+dropdown = tk.OptionMenu(
+    frame_lista,
+    dropdown_var,
+    "Quantidade",
+    "Valor (mais barato)",
+    "Valor (mais caro)",
+    "Data (mais antigo)",
+    "Data (mais recente)"
+)
 dropdown.pack()
 
-tk.Button(frame_lista, text="Ordenar", command=atualizar_lista).pack(pady=5)
-tk.Button(frame_lista, text="Ver produtos críticos", command=mostrar_criticos).pack(pady=5)
+tk.Button(frame_lista, text="Ordenar", command=atualizar_lista).pack()
 
-lista_box = tk.Listbox(frame_lista, width=70)
-lista_box.pack(pady=10)
+# 📋 LISTA
+lista_box = tk.Listbox(frame_lista, width=80)
+lista_box.pack()
 
 tk.Button(frame_lista, text="Cadastrar Novo Produto", command=mostrar_cadastro).pack()
 
@@ -151,45 +152,47 @@ tk.Button(frame_lista, text="Cadastrar Novo Produto", command=mostrar_cadastro).
 
 frame_cadastro = tk.Frame(root)
 
-tk.Label(frame_cadastro, text="Cadastro de Produto", font=("Arial", 14)).pack(pady=10)
+tk.Label(frame_cadastro, text="Cadastro de Produto", font=("Arial", 14)).pack()
 
-# Nome
 tk.Label(frame_cadastro, text="Nome").pack()
 entry_nome = tk.Entry(frame_cadastro)
 entry_nome.pack()
 
-# Quantidade
 tk.Label(frame_cadastro, text="Quantidade").pack()
 entry_qtd = tk.Entry(frame_cadastro)
 entry_qtd.pack()
 
-# Valor
-tk.Label(frame_cadastro, text="Valor").pack()
-entry_valor = tk.Entry(frame_cadastro)
-entry_valor.pack()
+tk.Label(frame_cadastro, text="Custo (R$)").pack()
+entry_custo = tk.Entry(frame_cadastro)
+entry_custo.pack()
 
-# Data de entrada (com calendário)
-tk.Label(frame_cadastro, text="Data de entrada").pack()
+tk.Label(frame_cadastro, text="Preço de Venda (R$)").pack()
+entry_preco = tk.Entry(frame_cadastro)
+entry_preco.pack()
+
+tk.Label(frame_cadastro, text="Data de Entrada").pack()
 entry_data = DateEntry(frame_cadastro, date_pattern="dd/mm/yyyy")
 entry_data.pack()
 
-# Checkbox perecível
+# ✅ CHECKBOX PERECÍVEL
 perecivel_var = tk.BooleanVar()
 
-check_perecivel = tk.Checkbutton(
+tk.Checkbutton(
     frame_cadastro,
     text="Produto perecível?",
     variable=perecivel_var,
     command=toggle_validade
-)
-check_perecivel.pack(pady=5)
+).pack()
 
-# Validade (inicialmente escondido)
-label_validade = tk.Label(frame_cadastro, text="Data de validade")
-date_validade = DateEntry(frame_cadastro, date_pattern="dd/mm/yyyy")
+# 📅 VALIDADE (ESCONDIDO)
+frame_validade = tk.Frame(frame_cadastro)
 
-# Botões
-tk.Button(frame_cadastro, text="Salvar", command=cadastrar).pack(pady=5)
+tk.Label(frame_validade, text="Data de Validade").pack()
+entry_validade = DateEntry(frame_validade, date_pattern="dd/mm/yyyy")
+entry_validade.pack()
+
+# BOTÕES
+tk.Button(frame_cadastro, text="Salvar", command=cadastrar).pack()
 tk.Button(frame_cadastro, text="Voltar", command=mostrar_lista).pack()
 
 # ===== INÍCIO =====
