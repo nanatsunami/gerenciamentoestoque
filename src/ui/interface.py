@@ -57,21 +57,7 @@ def atualizar_lista():
         produtos = [p for p in produtos if busca in p["nome"].lower()]
 
     # ===== ORDENAÇÃO =====
-    if criterio == "Quantidade":
-        produtos = sorted(produtos, key=lambda x: x["quantidade"])
-
-    elif criterio == "Preço de venda (mais barato)":
-        produtos = sorted(produtos, key=lambda x: x.get("preco", 0))
-
-    elif criterio == "Preço de venda (mais caro)":
-        produtos = sorted(produtos, key=lambda x: x.get("preco", 0), reverse=True)
-
-    elif criterio == "Data (mais antigo)":
-        produtos = sorted(produtos, key=lambda x: datetime.strptime(x["data"], "%d/%m/%Y"))
-
-    elif criterio == "Data (mais recente)":
-        produtos = sorted(produtos, key=lambda x: datetime.strptime(x["data"], "%d/%m/%Y"), reverse=True)
-
+    produtos = service.insertion_sort(produtos, criterio)
 
     # ===== SEPARAÇÃO =====
     alta, media, baixa = [], [], []
@@ -274,7 +260,7 @@ tk.OptionMenu(
     "Preço de venda (mais barato)",
     "Preço de venda (mais caro)",
     "Data (mais antigo)",
-    "Data (mais recente)",
+    "Data (mais recente)"
 ).pack(side=tk.LEFT, padx=5)
 
 tk.Button(frame_topo, text="Ordenar", command=atualizar_lista).pack(side=tk.LEFT)
