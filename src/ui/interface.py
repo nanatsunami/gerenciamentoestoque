@@ -60,10 +60,10 @@ def atualizar_lista():
     if criterio == "Quantidade":
         produtos = sorted(produtos, key=lambda x: x["quantidade"])
 
-    elif criterio == "Valor (mais barato)":
+    elif criterio == "Preço de venda (mais barato)":
         produtos = sorted(produtos, key=lambda x: x.get("preco", 0))
 
-    elif criterio == "Valor (mais caro)":
+    elif criterio == "Preço de venda (mais caro)":
         produtos = sorted(produtos, key=lambda x: x.get("preco", 0), reverse=True)
 
     elif criterio == "Data (mais antigo)":
@@ -91,11 +91,13 @@ def atualizar_lista():
     def formatar(p, nivel):
         custo = p.get("custo", 0)
         preco = p.get("preco", 0)
+        validade = p.get("validade", "Não perecível")
 
         return (
             f"{p['nome']} | Qtd: {p['quantidade']} | "
             f"Custo: R$ {custo:.2f} | Venda: R$ {preco:.2f} | "
-            f"{p['data']} | Prioridade: {nivel}"
+            f"Entrada: {p['data']} | Validade: {validade} | "
+            f"Prioridade: {nivel}"
         )
 
     # ===== EXIBIÇÃO =====
