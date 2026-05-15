@@ -15,15 +15,13 @@ service = EstoqueService(lista, fila)
 service.carregar_de_arquivo()
 
 produtos_filtrados = []
-
 produto_em_edicao = None
 
 # ===== FUNÇÕES =====
 
 def mostrar_lista():
     global produto_em_edicao
-
-    produto_em_edicao = None 
+    produto_em_edicao = None
 
     frame_cadastro.pack_forget()
     frame_lista.pack(fill="both", expand=True)
@@ -52,10 +50,10 @@ def atualizar_lista():
         produtos = sorted(produtos, key=lambda x: x["quantidade"])
 
     elif criterio == "Valor (mais barato)":
-        produtos = sorted(produtos, key=lambda x: x.get("preco", x.get("valor", 0)))
+        produtos = sorted(produtos, key=lambda x: x.get("preco", 0))
 
     elif criterio == "Valor (mais caro)":
-        produtos = sorted(produtos, key=lambda x: x.get("preco", x.get("valor", 0)), reverse=True)
+        produtos = sorted(produtos, key=lambda x: x.get("preco", 0), reverse=True)
 
     elif criterio == "Data (mais antigo)":
         produtos = sorted(produtos, key=lambda x: datetime.strptime(x["data"], "%d/%m/%Y"))
@@ -71,12 +69,10 @@ def atualizar_lista():
     for p in produtos:
         prioridade = service.calcular_prioridade(p)
 
-        custo = p.get("custo", p.get("valor", 0))
-        preco = p.get("preco", custo * 1.5)
-
         texto = (
             f"{p['nome']} | Qtd: {p['quantidade']} | "
-            f"Custo: R$ {custo:.2f} | Venda: R$ {preco:.2f} | "
+            f"Custo: R$ {p.get('custo', 0):.2f} | "
+            f"Venda: R$ {p.get('preco', 0):.2f} | "
             f"{p['data']} | Prioridade: {int(prioridade)}"
         )
 
@@ -129,13 +125,11 @@ def excluir():
         messagebox.showerror("Erro", "Selecione um produto")
         return
 
-    index = selecionado[0]
-    produto = produtos_filtrados[index]
+    produto = produtos_filtrados[selecionado[0]]
 
     lista.produtos.remove(produto)
     service.salvar_em_arquivo()
 
-    messagebox.showinfo("Sucesso", "Produto removido!")
     atualizar_lista()
 
 
@@ -148,12 +142,9 @@ def editar():
         messagebox.showerror("Erro", "Selecione um produto")
         return
 
-    index = selecionado[0]
-    produto = produtos_filtrados[index]
+    produto = produtos_filtrados[selecionado[0]]
+    produto_em_edicao = produto
 
-    produto_em_edicao = produto 
-
-    # preencher campos
     entry_nome.delete(0, tk.END)
     entry_nome.insert(0, produto["nome"])
 
@@ -196,25 +187,31 @@ def toggle_validade():
 
 
 # ===== JANELA =====
-
 root = tk.Tk()
-root.title("Sistema de Estoque")
-root.geometry("700x500")
+root.title("Gerenciamento de Estoque")
+
+# tela cheia adaptável
+root.state("zoomed")
 
 # ===== FRAME LISTA =====
-
 frame_lista = tk.Frame(root)
 
-tk.Label(frame_lista, text="Produtos em Estoque", font=("Arial", 14)).pack()
+# TÍTULO
+tk.Label(frame_lista, text="Gerenciamento de Estoque", font=("Arial", 18)).pack(pady=10)
 
-entry_busca = tk.Entry(frame_lista)
-entry_busca.pack()
-tk.Button(frame_lista, text="Buscar", command=atualizar_lista).pack()
+# TOPO (BUSCA + ORDENAÇÃO)
+frame_topo = tk.Frame(frame_lista)
+frame_topo.pack(pady=5)
+
+entry_busca = tk.Entry(frame_topo)
+entry_busca.pack(side=tk.LEFT, padx=5)
+
+tk.Button(frame_topo, text="Buscar", command=atualizar_lista).pack(side=tk.LEFT)
 
 dropdown_var = tk.StringVar(value="Quantidade")
 
 dropdown = tk.OptionMenu(
-    frame_lista,
+    frame_topo,
     dropdown_var,
     "Quantidade",
     "Valor (mais barato)",
@@ -223,44 +220,44 @@ dropdown = tk.OptionMenu(
     "Data (mais recente)",
     "Prioridade"
 )
-dropdown.pack()
+dropdown.pack(side=tk.LEFT, padx=5)
 
-tk.Button(frame_lista, text="Ordenar", command=atualizar_lista).pack()
+tk.Button(frame_topo, text="Ordenar", command=atualizar_lista).pack(side=tk.LEFT)
 
-lista_box = tk.Listbox(frame_lista, width=90)
-lista_box.pack()
+# LISTA
+lista_box = tk.Listbox(frame_lista, width=100)
+lista_box.pack(pady=10)
 
-tk.Button(frame_lista, text="Cadastrar Novo Produto", command=mostrar_cadastro).pack()
-tk.Button(frame_lista, text="Editar Produto", command=editar).pack()
-tk.Button(frame_lista, text="Excluir Produto", command=excluir).pack()
+# BOTÕES CRUD
+frame_botoes = tk.Frame(frame_lista)
+frame_botoes.pack(pady=10)
+
+tk.Button(frame_botoes, text="Cadastrar", command=mostrar_cadastro).pack(side=tk.LEFT, padx=10)
+tk.Button(frame_botoes, text="Editar", command=editar).pack(side=tk.LEFT, padx=10)
+tk.Button(frame_botoes, text="Excluir", command=excluir).pack(side=tk.LEFT, padx=10)
 
 # ===== FRAME CADASTRO =====
-
 frame_cadastro = tk.Frame(root)
 
-tk.Label(frame_cadastro, text="Cadastro de Produto", font=("Arial", 14)).pack()
+tk.Label(frame_cadastro, text="Cadastro de Produto", font=("Arial", 16)).pack(pady=10)
 
-tk.Label(frame_cadastro, text="Nome").pack()
 entry_nome = tk.Entry(frame_cadastro)
 entry_nome.pack()
 
-tk.Label(frame_cadastro, text="Quantidade").pack()
 entry_qtd = tk.Entry(frame_cadastro)
 entry_qtd.pack()
 
-tk.Label(frame_cadastro, text="Custo Unitário").pack()
 entry_custo = tk.Entry(frame_cadastro)
 entry_custo.pack()
 
-tk.Label(frame_cadastro, text="Preço de Venda").pack()
 entry_preco = tk.Entry(frame_cadastro)
 entry_preco.pack()
 
-tk.Label(frame_cadastro, text="Data de Entrada").pack()
 entry_data = DateEntry(frame_cadastro, date_pattern="dd/mm/yyyy")
 entry_data.pack()
 
 perecivel_var = tk.BooleanVar()
+
 tk.Checkbutton(
     frame_cadastro,
     text="Produto perecível?",
@@ -270,14 +267,12 @@ tk.Checkbutton(
 
 frame_validade = tk.Frame(frame_cadastro)
 
-tk.Label(frame_validade, text="Data de Validade").pack()
 entry_validade = DateEntry(frame_validade, date_pattern="dd/mm/yyyy")
 entry_validade.pack()
 
-tk.Button(frame_cadastro, text="Salvar", command=cadastrar).pack()
+tk.Button(frame_cadastro, text="Salvar", command=cadastrar).pack(pady=5)
 tk.Button(frame_cadastro, text="Voltar", command=mostrar_lista).pack()
 
 # ===== INÍCIO =====
-
 mostrar_lista()
 root.mainloop()
