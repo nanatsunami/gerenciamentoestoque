@@ -1,0 +1,56 @@
+# =========================
+# Python
+# =========================
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ambiente virtual
+venv/
+.env/
+.env.local
+
+# =========================
+# VSCode / IDE
+# =========================
+
+.vscode/
+.idea/
+
+# =========================
+# Sistema operacional
+# =========================
+
+# Windows
+Thumbs.db
+
+# Mac
+.DS_Store
+
+# =========================
+# Logs
+# =========================
+
+*.log
+
+# =========================
+# Build / executáveis
+# =========================
+
+dist/
+build/
+*.exe
+
+# =========================
+# Arquivos de configuração sensíveis
+# =========================
+
+secrets.json
+
+# =========================
+# Arquivos temporários
+# =========================
+
+*.tmp
+*.bak
