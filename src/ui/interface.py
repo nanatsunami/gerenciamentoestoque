@@ -33,6 +33,7 @@ def mostrar_cadastro():
     frame_lista.pack_forget()
     frame_cadastro.pack(fill="both", expand=True)
 
+
 def atualizar_lista():
     global produtos_filtrados
 
@@ -45,6 +46,7 @@ def atualizar_lista():
     if busca:
         produtos = [p for p in produtos if busca in p["nome"].lower()]
 
+    # ===== ORDENAÇÃO =====
     if criterio == "Quantidade":
         produtos = sorted(produtos, key=lambda x: x["quantidade"])
 
@@ -60,32 +62,59 @@ def atualizar_lista():
     elif criterio == "Data (mais recente)":
         produtos = sorted(produtos, key=lambda x: datetime.strptime(x["data"], "%d/%m/%Y"), reverse=True)
 
-    elif criterio == "Prioridade":
-        produtos = sorted(produtos, key=lambda x: service.calcular_prioridade(x), reverse=True)
 
-    produtos_filtrados = produtos
+    # ===== SEPARAÇÃO =====
+    alta, media, baixa = [], [], []
 
     for p in produtos:
         prioridade = service.calcular_prioridade(p)
 
-        # ===== CLASSIFICAÇÃO COM ALERTA =====
         if prioridade >= 7:
-            nivel = "ALTA !!!"
+            alta.append(p)
         elif prioridade >= 4:
-            nivel = "MÉDIA !!"
+            media.append(p)
         else:
-            nivel = "BAIXA !"
+            baixa.append(p)
 
+    mapa = []
+
+    def formatar(p, nivel):
         custo = p.get("custo", 0)
         preco = p.get("preco", 0)
 
-        texto = (
+        return (
             f"{p['nome']} | Qtd: {p['quantidade']} | "
             f"Custo: R$ {custo:.2f} | Venda: R$ {preco:.2f} | "
-            f"{p['data']} | Prioridade: {nivel}\n"
+            f"{p['data']} | Prioridade: {nivel}"
         )
 
-        lista_box.insert(tk.END, texto)
+    # ===== EXIBIÇÃO =====
+
+    if alta:
+        lista_box.insert(tk.END, "===== PRIORIDADE ALTA =====")
+        mapa.append(None)
+
+        for p in alta:
+            lista_box.insert(tk.END, formatar(p, "ALTA !!!"))
+            mapa.append(p)
+
+    if media:
+        lista_box.insert(tk.END, "----- PRIORIDADE MÉDIA -----")
+        mapa.append(None)
+
+        for p in media:
+            lista_box.insert(tk.END, formatar(p, "MÉDIA !!"))
+            mapa.append(p)
+
+    if baixa:
+        lista_box.insert(tk.END, "----- PRIORIDADE BAIXA -----")
+        mapa.append(None)
+
+        for p in baixa:
+            lista_box.insert(tk.END, formatar(p, "BAIXA !"))
+            mapa.append(p)
+
+    produtos_filtrados = mapa
 
 
 def cadastrar():
@@ -136,14 +165,9 @@ def excluir():
     index = selecionado[0]
     produto = produtos_filtrados[index]
 
-    if not selecionado:
-        messagebox.showerror("Erro", "Selecione um item pelo mouse")
+    if produto is None:
+        messagebox.showerror("Erro", "Selecione um produto válido")
         return
-
-    linha = str(selecionado[0]).split('.')[0]
-    index = int(linha) - 1
-
-    produto = produtos_filtrados[index]
 
     lista.produtos.remove(produto)
     service.salvar_em_arquivo()
@@ -164,14 +188,10 @@ def editar():
     index = selecionado[0]
     produto = produtos_filtrados[index]
 
-    if not selecionado:
-        messagebox.showerror("Erro", "Selecione um item")
+    if produto is None:
+        messagebox.showerror("Erro", "Selecione um produto válido")
         return
 
-    linha = str(selecionado[0]).split('.')[0]
-    index = int(linha) - 1
-
-    produto = produtos_filtrados[index]
     produto_em_edicao = produto
 
     entry_nome.delete(0, tk.END)
@@ -239,17 +259,15 @@ tk.OptionMenu(
     frame_topo,
     dropdown_var,
     "Quantidade",
-    "Valor (mais barato)",
-    "Valor (mais caro)",
+    "Preço de venda (mais barato)",
+    "Preço de venda (mais caro)",
     "Data (mais antigo)",
     "Data (mais recente)",
-    "Prioridade"
 ).pack(side=tk.LEFT, padx=5)
 
 tk.Button(frame_topo, text="Ordenar", command=atualizar_lista).pack(side=tk.LEFT)
 
-# ===== LISTA COM CORES =====
-lista_box = tk.Listbox(frame_lista, width=100, height=25, font=("Segoe UI Emoji", 10))
+lista_box = tk.Listbox(frame_lista, width=120, height=25)
 lista_box.pack()
 
 frame_botoes = tk.Frame(frame_lista)
@@ -276,7 +294,7 @@ tk.Label(frame_cadastro, text="Custo").pack()
 entry_custo = tk.Entry(frame_cadastro)
 entry_custo.pack()
 
-tk.Label(frame_cadastro, text="Preço").pack()
+tk.Label(frame_cadastro, text="Preço de venda").pack()
 entry_preco = tk.Entry(frame_cadastro)
 entry_preco.pack()
 
