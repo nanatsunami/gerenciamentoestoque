@@ -43,15 +43,15 @@ def atualizar_lista():
     if busca:
         produtos = [p for p in produtos if busca in p["nome"].lower()]
 
-    # 🔽 ORDENAÇÃO
+    # 🔽 ORDENAÇÃO (COM FALLBACK)
     if criterio == "Quantidade":
         produtos = sorted(produtos, key=lambda x: x["quantidade"])
 
     elif criterio == "Valor (mais barato)":
-        produtos = sorted(produtos, key=lambda x: x["preco"])
+        produtos = sorted(produtos, key=lambda x: x.get("preco", x.get("valor", 0)))
 
     elif criterio == "Valor (mais caro)":
-        produtos = sorted(produtos, key=lambda x: x["preco"], reverse=True)
+        produtos = sorted(produtos, key=lambda x: x.get("preco", x.get("valor", 0)), reverse=True)
 
     elif criterio == "Data (mais antigo)":
         produtos = sorted(produtos, key=lambda x: datetime.strptime(x["data"], "%d/%m/%Y"))
@@ -59,13 +59,16 @@ def atualizar_lista():
     elif criterio == "Data (mais recente)":
         produtos = sorted(produtos, key=lambda x: datetime.strptime(x["data"], "%d/%m/%Y"), reverse=True)
 
-    # 🧠 EXIBIÇÃO
+    # 🧠 EXIBIÇÃO (COM FALLBACK)
     for p in produtos:
         prioridade = service.calcular_prioridade(p)
 
+        custo = p.get("custo", p.get("valor", 0))
+        preco = p.get("preco", custo * 1.5)
+
         texto = (
             f"{p['nome']} | Qtd: {p['quantidade']} | "
-            f"Custo: R$ {p['custo']} | Venda: R$ {p['preco']} | "
+            f"Custo: R$ {custo:.2f} | Venda: R$ {preco:.2f} | "
             f"{p['data']} | Prioridade: {int(prioridade)}"
         )
 
@@ -119,7 +122,7 @@ frame_lista = tk.Frame(root)
 
 tk.Label(frame_lista, text="Produtos em Estoque", font=("Arial", 14)).pack()
 
-# 🔍 BARRA DE PESQUISA
+# 🔍 BUSCA
 tk.Label(frame_lista, text="Buscar por nome:").pack()
 entry_busca = tk.Entry(frame_lista)
 entry_busca.pack()
@@ -174,7 +177,7 @@ tk.Label(frame_cadastro, text="Data de Entrada").pack()
 entry_data = DateEntry(frame_cadastro, date_pattern="dd/mm/yyyy")
 entry_data.pack()
 
-# ✅ CHECKBOX PERECÍVEL
+# ✅ CHECKBOX
 perecivel_var = tk.BooleanVar()
 
 tk.Checkbutton(
@@ -184,7 +187,7 @@ tk.Checkbutton(
     command=toggle_validade
 ).pack()
 
-# 📅 VALIDADE (ESCONDIDO)
+# 📅 VALIDADE
 frame_validade = tk.Frame(frame_cadastro)
 
 tk.Label(frame_validade, text="Data de Validade").pack()
