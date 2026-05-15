@@ -11,9 +11,20 @@ class EstoqueService:
         data_entrada = datetime.strptime(produto["data"], "%d/%m/%Y")
 
         dias = (hoje - data_entrada).days
-        valor_total = produto["quantidade"] * produto["valor"]
 
-        prioridade = (dias * 2) + produto["quantidade"] + (valor_total / 10)
+        quantidade = produto["quantidade"]
+
+        custo = produto.get("custo", produto.get("valor", 0))
+        preco = produto.get("preco", custo * 1.5)
+
+        valor_total = quantidade * custo
+        margem = preco - custo
+
+        prioridade = (dias * 2) + quantidade + (valor_total / 10)
+
+        if margem < custo * 0.3:
+            prioridade += 20
+
         return prioridade
 
     def identificar_criticos(self):
