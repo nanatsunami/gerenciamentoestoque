@@ -29,9 +29,19 @@ def mostrar_lista():
     atualizar_lista()
 
 
-def mostrar_cadastro():
+def mostrar_cadastro(limpar=True):
+    global produto_em_edicao
+
+    if limpar:
+        produto_em_edicao = None
+        limpar_campos()
+
     frame_lista.pack_forget()
     frame_cadastro.pack(fill="both", expand=True)
+
+
+def novo_cadastro():
+    mostrar_cadastro(limpar=True)
 
 
 def atualizar_lista():
@@ -216,7 +226,7 @@ def editar():
         perecivel_var.set(False)
         toggle_validade()
 
-    mostrar_cadastro()
+    mostrar_cadastro(limpar=False)
 
 
 def limpar_campos():
@@ -273,7 +283,7 @@ lista_box.pack()
 frame_botoes = tk.Frame(frame_lista)
 frame_botoes.pack(pady=10)
 
-tk.Button(frame_botoes, text="Cadastrar", command=mostrar_cadastro).pack(side=tk.LEFT, padx=10)
+tk.Button(frame_botoes, text="Cadastrar", command=novo_cadastro).pack(side=tk.LEFT, padx=10)
 tk.Button(frame_botoes, text="Editar", command=editar).pack(side=tk.LEFT, padx=10)
 tk.Button(frame_botoes, text="Excluir", command=excluir).pack(side=tk.LEFT, padx=10)
 
