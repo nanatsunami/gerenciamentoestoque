@@ -11,21 +11,46 @@ class EstoqueService:
         data_entrada = datetime.strptime(produto["data"], "%d/%m/%Y")
 
         dias = (hoje - data_entrada).days
-
         quantidade = produto["quantidade"]
+        valor_total = quantidade * produto["preco"]
 
-        custo = produto.get("custo", produto.get("valor", 0))
-        preco = produto.get("preco", custo * 1.5)
+        # ===== NORMALIZAÇÃO =====
+        dias_score = min(dias / 30, 1) * 10
+        qtd_score = min(quantidade / 100, 1) * 10
+        valor_score = min(valor_total / 1000, 1) * 10
 
-        valor_total = quantidade * custo
-        margem = preco - custo
+        # ===== PESOS =====
+        peso_dias = 0.4
+        peso_qtd = 0.3
+        peso_valor = 0.3
 
-        prioridade = (dias * 2) + quantidade + (valor_total / 10)
+        prioridade = (
+            dias_score * peso_dias +
+            qtd_score * peso_qtd +
+            valor_score * peso_valor
+        )
 
-        if margem < custo * 0.3:
-            prioridade += 20
+        # ===== VALIDADE =====
+        if "validade" in produto:
+            data_validade = datetime.strptime(produto["validade"], "%d/%m/%Y")
+            dias_validade = (data_validade - hoje).days
 
-        return prioridade
+            if dias_validade <= 0:
+                prioridade = 10
+            elif dias_validade <= 7:
+                prioridade += 2
+
+        return round(prioridade, 2)
+    
+    def classificar_prioridade(self, produto):
+        prioridade = self.calcular_prioridade(produto)
+
+        if prioridade >= 150:
+            return "ALTA"
+        elif prioridade >= 80:
+            return "MÉDIA"
+        else:
+            return "BAIXA"
 
     def identificar_criticos(self):
         self.fila.fila.clear()
