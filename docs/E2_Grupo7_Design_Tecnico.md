@@ -298,6 +298,7 @@ def insertion_sort(self, produtos, criterio):
         produtos_ordenados[j + 1] = atual
 
     return produtos_ordenados
+```
 
 **Leitura de arquivo:**
 O sistema utiliza arquivos no formato JSON para armazenar os dados dos produtos cadastrados. A leitura é realizada pela camada de aplicação (estoque_service.py) por meio da biblioteca nativa json do Python.
@@ -306,6 +307,7 @@ O arquivo esperado está localizado em:
 Exemplo de arquivo de entrada: data/produtos.json
 
 ```
+[
     {
         "nome": "Café",
         "quantidade": 100,
@@ -320,6 +322,7 @@ Exemplo de arquivo de entrada: data/produtos.json
         "preco": 91.0,
         "data": "15/05/2026"
     }
+]
 ```
 ---
 
@@ -331,12 +334,6 @@ Exemplo de arquivo de entrada: data/produtos.json
 - [X] GUI desktop (Tkinter)
 - [ ] Web (HTML/JS, outro: __________)
 
-### 7.2 Tela 1 — Boas-vindas / Menu Principal
-
-**Descrição:** [O que o usuário vê ao iniciar o programa?]
-
-**Print ou representação textual:**
-```
 ### 7.2 Tela 1 — Boas-vindas / Menu Principal
 
 **Descrição:**
@@ -508,47 +505,123 @@ Prioridade: MÉDIA !!
 
 ## 8. Testes Unitários
 
-**Framework de testes utilizado:** [Ex.: pytest, JUnit, unittest]
+**Framework de testes utilizado:** unittest
 
-**Localização:** `tests/[nome_do_arquivo_de_testes]`
+**Localização:** `tests/testes_estruturas`
 
-### Estrutura testada: [Nome da Estrutura]
-
+### Estrutura testada: Lista de Produtos
 ---
 
 **Teste 1 — Caso base**
 
-Descrição: [O que este teste verifica?]
+Descrição: Verifica se um produto é inserido corretamente na lista.
 
-```[linguagem]
-[Cole o código do teste aqui]
+```
+def test_inserir_produto(self):
+    lista = ListaProdutos()
+    produto = {"nome": "Papel", "quantidade": 10}
+
+    lista.inserir(produto)
+
+    self.assertEqual(lista.exibir()[0]["nome"], "Papel")
 ```
 
-Resultado: ✅ Passando / ❌ Falhando
+Resultado: ✅ Passando
 
 ---
 
 **Teste 2 — Caso vazio**
 
-Descrição: [O que este teste verifica? Ex.: comportamento ao executar pop em pilha vazia]
+Descrição: Verifica se a busca em uma lista vazia retorna None.
 
-```[linguagem]
-[Cole o código do teste aqui]
+```
+def test_buscar_lista_vazia(self):
+    lista = ListaProdutos()
+
+    resultado = lista.buscar("Papel")
+
+    self.assertIsNone(resultado)
 ```
 
-Resultado: ✅ Passando / ❌ Falhando
+Resultado: ✅ Passando
 
 ---
 
 **Teste 3 — Caso com múltiplos elementos**
 
-Descrição: [O que este teste verifica? Ex.: sequência de operações sobre estrutura populada]
+Descrição: Verifica se a busca retorna corretamente um produto entre vários cadastrados.
 
-```[linguagem]
-[Cole o código do teste aqui]
+```
+def test_buscar_multiplos_produtos(self):
+    lista = ListaProdutos()
+
+    lista.inserir({"nome": "Papel", "quantidade": 10})
+    lista.inserir({"nome": "Lápis", "quantidade": 5})
+    lista.inserir({"nome": "Borracha", "quantidade": 20})
+
+    resultado = lista.buscar("Papel")
+
+    self.assertEqual(resultado["nome"], "Papel")
 ```
 
-Resultado: ✅ Passando / ❌ Falhando
+Resultado: ✅ Passando
+
+### Estrutura testada: Fila de Produtos Críticos
+---
+
+**Teste 1 — Caso base**
+
+Descrição: Verifica se um produto é inserido corretamente na lista.
+
+```
+def test_enqueue_produto(self):
+    fila = FilaCriticos()
+    produto = {"nome": "Papel", "prioridade": 8}
+
+    fila.enqueue(produto)
+
+    self.assertEqual(fila.frente()["nome"], "Papel")
+```
+
+Resultado: ✅ Passando
+
+---
+
+**Teste 2 — Caso vazio**
+
+Descrição: Verifica se a busca em uma lista vazia retorna None.
+
+```
+def test_dequeue_fila_vazia(self):
+    fila = FilaCriticos()
+
+    resultado = fila.dequeue()
+
+    self.assertIsNone(resultado)
+```
+
+Resultado: ✅ Passando
+
+---
+
+**Teste 3 — Caso com múltiplos elementos**
+
+Descrição: Verifica se a busca retorna corretamente um produto entre vários cadastrados.
+
+```
+def test_fifo_multiplos_produtos(self):
+    fila = FilaCriticos()
+
+    fila.enqueue({"nome": "Papel"})
+    fila.enqueue({"nome": "Lápis"})
+    fila.enqueue({"nome": "Borracha"})
+
+    primeiro = fila.dequeue()
+
+    self.assertEqual(primeiro["nome"], "Papel")
+```
+
+Resultado: ✅ Passando
 
 ---
 
@@ -557,44 +630,40 @@ Resultado: ✅ Passando / ❌ Falhando
 Antes de entregar, verifique se você:
 
 **Seção 1 — Estruturas**
-- [ ] Big-O preenchido para inserção, remoção, busca e acesso de cada estrutura
-- [ ] Pelo menos 1 alternativa descartada com justificativa técnica
-- [ ] Limitações conhecidas descritas
-- [ ] Referência bibliográfica fornecida
+- [V] Big-O preenchido para inserção, remoção, busca e acesso de cada estrutura
+- [V] Pelo menos 1 alternativa descartada com justificativa técnica
+- [V] Limitações conhecidas descritas
+- [V] Referência bibliográfica fornecida
 
 **Seção 2 — Arquitetura**
-- [ ] Diagrama com as 3 camadas visíveis
-- [ ] Fluxo de comunicação entre camadas descrito
+- [V] Diagrama com as 3 camadas visíveis
+- [V] Fluxo de comunicação entre camadas descrito
 
 **Seção 3 — Diretórios**
-- [ ] Árvore de diretórios presente
-- [ ] Desvios do modelo justificados (ou "Nenhum desvio" declarado)
+- [V] Árvore de diretórios presente
+- [V] Desvios do modelo justificados (ou "Nenhum desvio" declarado)
 
 **Seção 4 — Backlog**
-- [ ] 5 ou mais itens In-Scope com critério de aceite no formato Dado/Quando/Então
-- [ ] 3 ou mais itens Out-of-Scope com justificativa
+- [V] 5 ou mais itens In-Scope com critério de aceite no formato Dado/Quando/Então
+- [V] 3 ou mais itens Out-of-Scope com justificativa
 
 **Seção 5 — Repositório**
-- [ ] Link do repositório público informado
-- [ ] README.md com instruções de execução
-- [ ] Mínimo de 5 commits semânticos
+- [V] Link do repositório público informado
+- [V] README.md com instruções de execução
+- [V] Mínimo de 5 commits semânticos
 
 **Seção 6 — Núcleo**
-- [ ] Pelo menos 1 estrutura completamente implementada
-- [ ] Leitura de arquivo funcionando
-- [ ] Trecho de código representativo incluído no template
+- [V] Pelo menos 1 estrutura completamente implementada
+- [V] Leitura de arquivo funcionando
+- [V] Trecho de código representativo incluído no template
 
 **Seção 7 — MVP**
-- [ ] 3 telas documentadas com print ou representação textual
-- [ ] Fluxo completo de ponta a ponta demonstrado
-- [ ] Mensagem de erro para operação inválida implementada
-- [ ] Loop de menu funcionando (programa não encerra após 1 operação)
+- [V] 3 telas documentadas com print ou representação textual
+- [V] Fluxo completo de ponta a ponta demonstrado
+- [V] Mensagem de erro para operação inválida implementada
+- [V] Loop de menu funcionando (programa não encerra após 1 operação)
 
 **Seção 8 — Testes**
-- [ ] 3 testes por estrutura documentados neste template
-- [ ] Resultado de cada teste indicado (✅ / ❌)
-
+- [V] 3 testes por estrutura documentados neste template
+- [V] Resultado de cada teste indicado (✅ / ❌)
 ---
-
-*Nome do arquivo de entrega: `E2_<grupo>_Design_Tecnico.md`*
-*Este arquivo deve estar na pasta `/doc` do repositório.*
